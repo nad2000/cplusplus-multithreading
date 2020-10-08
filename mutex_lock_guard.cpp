@@ -13,14 +13,17 @@
 using namespace std;
 const int ITERATIONS = 1E6;
 
+// Resource acquisition is initialization (RAII)
+// Acquire the lock (resource) at the initialization and when it
+// goes out of scope, it gets released.
+
 void work(int &count, mutex &mtx) {
   // mtx.lock(); // not a good idea - threads wouldn't interleave
   for (int i = 0; i < ITERATIONS; i++) {
-    mtx.lock();
-    ++count;      // critical section...
-    mtx.unlock(); // it's not a good idea to use the mutexes directly:
-    // if you get an exception in the critical section, your mutex might remain
-    // locked
+    lock_guard<mutex> guard(mtx); // the guard attempts to acquire the lock
+    // unique_guard<mutex> guard(mtx); // richer functionality
+    ++count; // critical section...
+    // the section ends here and the lock gets released
   }
   // mtx.unlock();
 };

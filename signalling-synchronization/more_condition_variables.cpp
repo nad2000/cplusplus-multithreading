@@ -20,17 +20,25 @@ int main() {
 
   thread t1([&]() {
     this_thread::sleep_for(chrono::milliseconds(2000));
+
+    cout << "(t1) acquiring lock" << endl;
     unique_lock<mutex> lock(mtx);
+    cout << "(t1) acquired lock" << endl;
     ready = true;
-    lock.unlock();          // unique_lock needs only unlock
+    cout << "(t1) releasing lock" << endl;
+    lock.unlock(); // unique_lock needs only unlock
+    cout << "(t1) released lock; notifying the main thread" << endl;
     condition.notify_one(); // notifies the waiting thread
+    cout << "(t1) notified the main thread" << endl;
   });
 
+  cout << "(main) acquiring lock" << endl;
   unique_lock<mutex> lock(mtx);
-  while (!ready) {
-    condition.wait(lock); // this releases the lock and waits
-    // for other thread to notify...
-  }
+  cout << "(main) acquired lock; waiting..." << endl;
+  condition.wait(
+      lock, [&ready]() { return ready; }); // this releases the lock and waits
+  cout << "(main) finished waiting" << endl;
+  // for other thread to notify...
   cout << "ready " << ready << endl;
   // cout << fmt::format("ready {}\n", ready);
 

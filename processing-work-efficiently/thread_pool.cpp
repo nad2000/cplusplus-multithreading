@@ -63,7 +63,7 @@ int work(int id) {
 }
 
 int main() {
-  BlockingQueue<shared_future<int>> futures(2);
+  BlockingQueue<shared_future<int>> futures(thread::hardware_concurrency() - 1);
   // if the work is CPU intensive then better use hardware_concurrency()-1
   // if you are waiting for some external resources, better to use x n threads
   int worker_count = thread::hardware_concurrency() * 3;
